@@ -15,7 +15,7 @@
 from abc import abstractmethod
 from typing import AsyncGenerator
 
-from google.genai import types
+from google.generativeai import types
 
 from .llm_response import LlmResponse
 

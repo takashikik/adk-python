@@ -24,7 +24,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
-from google.genai import types
+from google.generativeai import types
 from opentelemetry import trace
 from pydantic import BaseModel
 from pydantic import ConfigDict

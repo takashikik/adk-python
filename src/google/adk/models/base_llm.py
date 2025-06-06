@@ -17,7 +17,7 @@ from abc import abstractmethod
 from typing import AsyncGenerator
 from typing import TYPE_CHECKING
 
-from google.genai import types
+from google.generativeai import types
 from pydantic import BaseModel
 from pydantic import ConfigDict
 

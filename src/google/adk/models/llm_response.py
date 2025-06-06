@@ -17,7 +17,9 @@ from __future__ import annotations
 from typing import Any
 from typing import Optional
 
-from google.genai import types
+from google.generativeai.types.content_types import Content
+from google.generativeai.types.citation_types import GroundingMetadata
+from google.generativeai.types.generation_types import GenerateContentResponseUsageMetadata, GenerateContentResponse
 from pydantic import alias_generators
 from pydantic import BaseModel
 from pydantic import ConfigDict
@@ -49,10 +51,10 @@ class LlmResponse(BaseModel):
   )
   """The pydantic model config."""
 
-  content: Optional[types.Content] = None
+  content: Optional[Content] = None
   """The content of the response."""
 
-  grounding_metadata: Optional[types.GroundingMetadata] = None
+  grounding_metadata: Optional[GroundingMetadata] = None
   """The grounding metadata of the response."""
 
   partial: Optional[bool] = None
@@ -86,12 +88,12 @@ class LlmResponse(BaseModel):
   NOTE: the entire dict must be JSON serializable.
   """
 
-  usage_metadata: Optional[types.GenerateContentResponseUsageMetadata] = None
+  usage_metadata: Optional[GenerateContentResponseUsageMetadata] = None
   """The usage metadata of the LlmResponse"""
 
   @staticmethod
   def create(
-      generate_content_response: types.GenerateContentResponse,
+      generate_content_response: GenerateContentResponse, # This will cause an error, need to import GenerateContentResponse
   ) -> 'LlmResponse':
     """Creates an LlmResponse from a GenerateContentResponse.
 

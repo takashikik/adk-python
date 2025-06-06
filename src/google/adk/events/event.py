@@ -18,7 +18,7 @@ import random
 import string
 from typing import Optional
 
-from google.genai import types
+from google.generativeai import types
 from pydantic import alias_generators
 from pydantic import ConfigDict
 from pydantic import Field
