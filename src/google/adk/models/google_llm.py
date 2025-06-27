@@ -35,6 +35,7 @@ from .base_llm import BaseLlm
 from .base_llm_connection import BaseLlmConnection
 from .gemini_llm_connection import GeminiLlmConnection
 from .llm_response import LlmResponse
+from .retry_utils import retry_async_generator
 
 if TYPE_CHECKING:
   from .llm_request import LlmRequest
@@ -85,6 +86,23 @@ class Gemini(BaseLlm):
     Yields:
       LlmResponse: The model response.
     """
+
+    async def _generate_content():
+      async for response in self._generate_content_impl(llm_request, stream):
+        yield response
+
+    operation_name = (
+        f"Gemini {self.model} {'streaming' if stream else 'non-streaming'} call"
+    )
+    async for response in retry_async_generator(
+        _generate_content, self.retry_config, operation_name
+    ):
+      yield response
+
+  async def _generate_content_impl(
+      self, llm_request: LlmRequest, stream: bool = False
+  ) -> AsyncGenerator[LlmResponse, None]:
+    """Internal implementation of generate_content_async with retry logic."""
     self._preprocess_request(llm_request)
     self._maybe_append_user_content(llm_request)
     logger.info(
