@@ -48,13 +48,10 @@ def TransferToParentCallback(callback_context: CallbackContext):
                 )
  I believe the ideal solution would be for an enforce_transfer_to_parent feature to be implemented.
 ただ,  callbackではなく,@src/google/adk/flows/llm_flows/agent_transfer.py を修正する形での実装にする必要がある
+→すでにagent_transfer.pyに実装完了
 
-- [x] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して
-- [x] この修正の影響が問題ないか, type checkを行って
-- [x] この修正の影響が問題ないか, unittest(tests/unittests)を行って
-
-- [ ] 下記のunittestがfailするので確認、修正して
-FAILED tests/unittests/agents/test_base_agent.py::test_enforce_transfer_to_parent[GOOGLE_AI] - pydantic_core._pydantic_core.ValidationError: 1 validation error for _TestingAgent
-FAILED tests/unittests/agents/test_base_agent.py::test_enforce_transfer_to_parent[VERTEX] - pydantic_core._pydantic_core.ValidationError: 1 validation error for _TestingAgent
-
+- [ ] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
+- [ ] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
+- [ ] この修正の影響が問題ないか, type checkを行って
+- [ ] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
 - [ ] この修正のPR Messageを.gemini/WORK配下に作って

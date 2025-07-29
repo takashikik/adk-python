@@ -82,6 +82,12 @@ line_break = '\n'
 def _build_target_agents_instructions(
     agent: LlmAgent, target_agents: list[BaseAgent]
 ) -> str:
+  if agent.enforce_transfer_to_parent:
+    return f"""
+You must transfer to your parent agent, {agent.parent_agent.name}, by calling the `{_TRANSFER_TO_AGENT_FUNCTION_NAME}` function.
+When transferring, do not generate any text other than the function call.
+"""
+
   si = f"""
 You have a list of other agents to transfer to:
 
@@ -112,6 +118,12 @@ _TRANSFER_TO_AGENT_FUNCTION_NAME = transfer_to_agent.__name__
 
 def _get_transfer_targets(agent: LlmAgent) -> list[BaseAgent]:
   from ...agents.llm_agent import LlmAgent
+
+  if agent.enforce_transfer_to_parent:
+    if agent.parent_agent:
+      return [agent.parent_agent]
+    else:
+      return []
 
   result = []
   result.extend(agent.sub_agents)
