@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.adk.events.event import Event
 from google.adk.agents.llm_agent import Agent
 from google.adk.agents.loop_agent import LoopAgent
 from google.adk.agents.sequential_agent import SequentialAgent
@@ -308,4 +309,69 @@ def test_auto_to_loop():
   # root_agent should still be the current agent because sub_agent_1 is loop.
   assert testing_utils.simplify_events(runner.run('test2')) == [
       ('root_agent', 'response4'),
+  ]
+
+
+
+
+import pytest
+from google.genai import types
+
+
+@pytest.mark.asyncio
+async def test_enforce_transfer_to_parent():
+  response = [
+      'child response',
+      transfer_call_part('root_agent'),
+      'root response',
+  ]
+  mock_model = testing_utils.MockModel.create(responses=response)
+
+  child_agent = Agent(
+      name='child_agent',
+      model=mock_model,
+      enforce_transfer_to_parent=True,
+  )
+  root_agent = Agent(
+      name='root_agent',
+      model=mock_model,
+      sub_agents=[child_agent],
+  )
+
+  runner = testing_utils.InMemoryRunner(root_agent)
+  session = await runner.runner.session_service.create_session(
+      app_name=runner.runner.app_name, user_id='test_user'
+  )
+  await runner.runner.session_service.append_event(
+      session,
+      Event(
+          author='child_agent',
+          content=types.Content(parts=[types.Part(text='dummy')]),
+      ),
+  )
+
+  events1 = []
+  async for event in runner.runner.run_async(
+      user_id=session.user_id,
+      session_id=session.id,
+      new_message=testing_utils.get_user_content('test1'),
+  ):
+      events1.append(event)
+
+  assert testing_utils.simplify_events(events1) == [
+      ('child_agent', 'child response'),
+  ]
+
+  events2 = []
+  async for event in runner.runner.run_async(
+      user_id=session.user_id,
+      session_id=session.id,
+      new_message=testing_utils.get_user_content('test2'),
+  ):
+      events2.append(event)
+
+  assert testing_utils.simplify_events(events2) == [
+      ('child_agent', transfer_call_part('root_agent')),
+      ('child_agent', TRANSFER_RESPONSE_PART),
+      ('root_agent', 'root response'),
   ]

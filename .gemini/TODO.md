@@ -12,6 +12,7 @@
 * Geminiの最新モデルは "gemini-2.5-pro", 1.5 ,2.0 ではない
 * 1タスク
 * unittestは全部実行すると時間がかかるので、**極力、必要なtestのみ実行し**、最後に念の為全部実行というように
+* **src/google/adk/runners.pyの部分など,コアな部分は極力修正してはいけない,本当の本当に最後の手段**
 
 
 ## P1
@@ -52,8 +53,9 @@ def TransferToParentCallback(callback_context: CallbackContext):
 ただ,  callbackではなく,@src/google/adk/flows/llm_flows/agent_transfer.py を修正する形での実装にする必要がある
 →すでにagent_transfer.pyに実装完了
 
-- [ ] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
-- [ ] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
-- [ ] この修正の影響が問題ないか, type checkを行って
-- [ ] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
-- [ ] この修正のPR Messageを.gemini/WORK配下に作って
+- [x] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
+- [x] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
+- [x] この修正の影響が問題ないか, type checkを行って
+- [x] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
+- [x] この修正のPR Messageを.gemini/WORK配下に作って
+- [ ] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
