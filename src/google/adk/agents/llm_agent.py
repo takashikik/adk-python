@@ -164,6 +164,10 @@ class LlmAgent(BaseAgent):
   end-user. This behavior prevents one-way transfer, in which end-user may be
   stuck with one agent that cannot transfer to other agents in the agent tree.
   """
+  enforce_transfer_to_parent: bool = False
+  """If True, the agent must transfer control to its parent agent after its
+  execution is complete.
+  """
   disallow_transfer_to_peers: bool = False
   """Disallows LLM-controlled transferring to the peer agents."""
   # LLM-based agent transfer configs - End
@@ -602,6 +606,8 @@ class LlmAgent(BaseAgent):
       agent.instruction = config.instruction
     if config.disallow_transfer_to_parent:
       agent.disallow_transfer_to_parent = config.disallow_transfer_to_parent
+    if config.enforce_transfer_to_parent:
+      agent.enforce_transfer_to_parent = config.enforce_transfer_to_parent
     if config.disallow_transfer_to_peers:
       agent.disallow_transfer_to_peers = config.disallow_transfer_to_peers
     if config.include_contents != 'default':

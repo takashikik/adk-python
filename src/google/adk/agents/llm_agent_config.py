@@ -49,6 +49,9 @@ class LlmAgentConfig(BaseAgentConfig):
   disallow_transfer_to_parent: Optional[bool] = None
   """Optional. LlmAgent.disallow_transfer_to_parent."""
 
+  enforce_transfer_to_parent: Optional[bool] = None
+  """Optional. LlmAgent.enforce_transfer_to_parent."""
+
   disallow_transfer_to_peers: Optional[bool] = None
   """Optional. LlmAgent.disallow_transfer_to_peers."""
 
