@@ -11,6 +11,8 @@
 * unittestは" pytest ./tests/unittests"で実行可能
 * Geminiの最新モデルは "gemini-2.5-pro", 1.5 ,2.0 ではない
 * 1タスク
+* unittestは全部実行すると時間がかかるので、**極力、必要なtestのみ実行し**、最後に念の為全部実行というように
+
 
 ## P1
 - [x] Is your feature request related to a problem? Please describe.
