@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.adk.events.event import Event
 from google.adk.agents.llm_agent import Agent
 from google.adk.agents.loop_agent import LoopAgent
 from google.adk.agents.sequential_agent import SequentialAgent
+from google.adk.events.event import Event
 from google.adk.tools.exit_loop_tool import exit_loop
 from google.genai.types import Part
 
@@ -312,10 +312,8 @@ def test_auto_to_loop():
   ]
 
 
-
-
-import pytest
 from google.genai import types
+import pytest
 
 
 @pytest.mark.asyncio
@@ -356,7 +354,7 @@ async def test_enforce_transfer_to_parent():
       session_id=session.id,
       new_message=testing_utils.get_user_content('test1'),
   ):
-      events1.append(event)
+    events1.append(event)
 
   assert testing_utils.simplify_events(events1) == [
       ('child_agent', 'child response'),
@@ -368,7 +366,7 @@ async def test_enforce_transfer_to_parent():
       session_id=session.id,
       new_message=testing_utils.get_user_content('test2'),
   ):
-      events2.append(event)
+    events2.append(event)
 
   assert testing_utils.simplify_events(events2) == [
       ('child_agent', transfer_call_part('root_agent')),
