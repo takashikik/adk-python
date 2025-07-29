@@ -1,8 +1,16 @@
+# ADK Studio - TODO List
+
+このファイルは、開発の進捗と今後のタスクを管理するためのものです。
+
 ## 前提事項
+* **必ず一つTaskを実施する際には,TDD(unittestを作成してから作業)で作業を進めて行ってください**
+* **TODOの作業は1タスクずつ実施し、完了後TODOを変更してから次のTaskに移ってください**
+* **何回か同じファイルの編集に失敗する場合、そのファイルを削除して、作り直して**
 * **pythonのpathは"/home/admin_takak_altostrat_com/projects/adk-python/.venv/bin/python"**
 * まず作業の前にAGENTS.mdをかならずREADFIleすること
 * unittestは" pytest ./tests/unittests"で実行可能
 * Geminiの最新モデルは "gemini-2.5-pro", 1.5 ,2.0 ではない
+* 1タスク
 
 ## P1
 - [x] Is your feature request related to a problem? Please describe.
