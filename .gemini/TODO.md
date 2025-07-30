@@ -16,7 +16,7 @@
 
 
 ## P1
-- [ ] 下記のIssueへの対応(サブタスクに分けて対応)
+- [x] 下記のIssueへの対応(サブタスクに分けて対応)
 src/google/adk/agents/llm_agent_config.py
 src/google/adk/agents/llm_agent.py
 への反映は完了済み
@@ -88,14 +88,70 @@ Notes
 この機能は既存のdisallow_transfer_to_parentの逆の動作を提供しますが、実装上は単純な反転ではありません。disallow_transfer_to_parentは転送能力を制限する設定ですが、enforce_transfer_to_parentは実行完了後の自動転送を強制する設定であり、フローの異なる段階で動作します。特に、エージェントの実行が完了した時点で親エージェントへの転送を自動的に実行する仕組みを新たに実装する必要があります。
 ```
     ### サブタスク
-    - [ ] 修正する箇所を決めるための徹底的なソースコードの読み込み
-    - [ ] 修正方針を明文化しTIPS.mdへ記載
-    - [ ] 修正方針に従っての実装
+    - [x] 修正する箇所を決めるための徹底的なソースコードの読み込み
+    - [x] 修正方針を明文化しTIPS.mdへ記載
+    - [x] 修正方針に従っての実装
 
-- [ ] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
-- [ ] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
-- [ ] この修正の影響が問題ないか, type checkを行って
-- [ ] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
-- [ ] この修正のPR Messageを.gemini/WORK配下に作って
-- [ ] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
+- [x] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
+- [x] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
+- [x] この修正の影響が問題ないか, type checkを行って
+- [x] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
+- [x] この修正のPR Messageを.gemini/WORK配下に作って
+- [x] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
 - [ ] Integration テスト用の超簡単なsample agent.pyを作って
+
+- [ ] src/google/adk/agents/llm_agent.pyの今回の修正に対する主要な問題点の修正
+1. 重複したインポート文
+from ...agents.llm_agent import LlmAgent
+このインポート文が2回出現しています 。最初の条件分岐の前と、elseブロック内で再度インポートされています。これは不要な重複です。
+
+2. 重複したロジック
+第1段階と第2段階で同じ条件チェック（isinstance(agent, LlmAgent)、agent.enforce_transfer_to_parent、agent.parent_agent）が繰り返されています 。これはDRY原則に反しており、保守性を低下させます。
+
+3. 複雑な制御フロー
+2段階に分かれた処理により、同じ目的（親エージェントへの転送）を達成するために異なるパスが存在し、理解が困難です 。
+
+改善提案
+1. インポートの統一
+ファイルの先頭で一度だけインポートし、関数内での重複インポートを削除する AGENTS.md:52-60 。
+
+2. ヘルパー関数の抽出
+共通の条件チェックと転送ロジックを別関数に抽出：
+
+def _should_enforce_transfer_to_parent(self, agent) -> bool:  
+    return (  
+        isinstance(agent, LlmAgent)  
+        and agent.enforce_transfer_to_parent  
+        and agent.parent_agent  
+    )  
+  
+def _create_transfer_function_call(self, agent):  
+    return types.FunctionCall(  
+        name='transfer_to_agent',  
+        args={'agent_name': agent.parent_agent.name},  
+    )
+3. 単一責任の原則
+現在の実装では、モデルレスポンスの修正と新しいイベントの作成という2つの異なるアプローチを使用しています。一貫性のために単一のアプローチに統一することを推奨します 。
+
+- [ ] tests/unittests/flows/llm_flows/test_enforce_transfer.pyへのテストケースの追加。不足しているテストケース
+1. parent_agentが存在しない場合のテスト
+enforce_transfer_to_parent=Trueだがparent_agentが設定されていない場合の動作をテストする必要があります llm_agent.py:157-163 。
+
+@pytest.mark.asyncio  
+async def test_enforce_transfer_to_parent_without_parent_agent():  
+    """Tests behavior when enforce_transfer_to_parent is True but no parent_agent exists."""  
+    child_agent = LlmAgent(  
+        name="child",  
+        model=MockModel.create(responses=["Response from child"]),  
+        enforce_transfer_to_parent=True,  
+    )  
+    # parent_agentが設定されていない状態でのテスト
+2. モデルが既にファンクションコールを返している場合のテスト
+モデルレスポンスに既にファンクションコールが含まれている場合、強制転送が実行されないことを確認する必要があります。これは実装の第1段階の条件 not model_response_event.get_function_calls() に対応します 。
+
+3. 非LlmAgentでのテスト
+isinstance(agent, LlmAgent) の条件をテストするため、非LlmAgentでの動作確認が必要です test_runners.py:34-56 。
+
+4. ライブモードでのテスト
+現在のテストは _run_one_step_async のみをテストしていますが、ライブモード（_postprocess_live）での動作もテストすべきです base_llm_flow.py:454-467 。
+

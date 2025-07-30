@@ -481,8 +481,19 @@ class LlmAgent(BaseAgent):
     return self
 
   def __check_output_schema(self):
+    if self.enforce_transfer_to_parent and self.disallow_transfer_to_parent:
+      raise ValueError(
+          'Invalid config for agent %s: enforce_transfer_to_parent and'
+          ' disallow_transfer_to_parent cannot both be True.'
+      )
     if not self.output_schema:
       return
+
+    if self.enforce_transfer_to_parent:
+      raise ValueError(
+          f'Invalid config for agent {self.name}: if output_schema is set,'
+          ' enforce_transfer_to_parent must be False.'
+      )
 
     if (
         not self.disallow_transfer_to_parent

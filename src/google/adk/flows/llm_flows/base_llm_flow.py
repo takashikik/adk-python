@@ -400,14 +400,63 @@ class BaseLlmFlow(ABC):
     model_response_event = self._finalize_model_response_event(
         llm_request, llm_response, model_response_event
     )
-    yield model_response_event
 
     # Handles function calls.
+    from ...agents.llm_agent import LlmAgent
+
+    agent = invocation_context.agent
+    if (
+        isinstance(agent, LlmAgent)
+        and agent.enforce_transfer_to_parent
+        and agent.parent_agent
+        and not model_response_event.get_function_calls()
+    ):
+        model_response_event.content = types.Content(
+            parts=[
+                types.Part(
+                    function_call=types.FunctionCall(
+                        name='transfer_to_agent',
+                        args={'agent_name': agent.parent_agent.name},
+                    )
+                )
+            ]
+        )
+
+    yield model_response_event
+
     if model_response_event.get_function_calls():
       async for event in self._postprocess_handle_function_calls_async(
           invocation_context, model_response_event, llm_request
       ):
         yield event
+    else:
+      from ...agents.llm_agent import LlmAgent
+
+      agent = invocation_context.agent
+      if (
+          isinstance(agent, LlmAgent)
+          and agent.enforce_transfer_to_parent
+          and agent.parent_agent
+      ):
+        transfer_event = Event(
+            id=Event.new_id(),
+            invocation_id=invocation_context.invocation_id,
+            author=agent.name,
+            content=types.Content(
+                parts=[
+                    types.Part(
+                        function_call=types.FunctionCall(
+                            name='transfer_to_agent',
+                            args={'agent_name': agent.parent_agent.name},
+                        )
+                    )
+                ]
+            ),
+        )
+        async for event in self._postprocess_handle_function_calls_async(
+            invocation_context, transfer_event, llm_request
+        ):
+          yield event
 
   async def _postprocess_live(
       self,
