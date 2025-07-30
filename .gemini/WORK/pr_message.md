@@ -1,7 +1,7 @@
 
-feat: add enforce_transfer_to_parent to LlmAgent
+feat: add fallback_to_parent to LlmAgent
 
-This adds a new boolean property to the `LlmAgent` named `enforce_transfer_to_parent`.
+This adds a new boolean property to the `LlmAgent` named `fallback_to_parent`.
 
 When `fallback_to_parent` is set to `True`, the agent must transfer control to its parent agent after its execution is complete. This acts as the inverse of `disallow_transfer_to_parent`.
 

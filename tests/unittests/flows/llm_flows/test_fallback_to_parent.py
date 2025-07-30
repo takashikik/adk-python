@@ -12,8 +12,8 @@ from tests.unittests.testing_utils import MockModel
 
 
 @pytest.mark.asyncio
-async def test_enforce_transfer_to_parent_transfers_control():
-    """Tests that the agent transfers control to the parent when enforce_transfer_to_parent is True."""
+async def test_fallback_to_parent_transfers_control():
+    """Tests that the agent transfers control to the parent when fallback_to_parent is True."""
     parent_agent = LlmAgent(
         name="parent",
         model=MockModel.create(responses=["Response from parent"]),
@@ -43,8 +43,8 @@ async def test_enforce_transfer_to_parent_transfers_control():
 
 
 @pytest.mark.asyncio
-async def test_enforce_transfer_to_parent_and_disallow_raises_error():
-    """Tests that ValueError is raised when enforce_transfer_to_parent and disallow_transfer_to_parent are both True."""
+async def test_fallback_to_parent_and_disallow_raises_error():
+    """Tests that ValueError is raised when fallback_to_parent and disallow_transfer_to_parent are both True."""
     with pytest.raises(ValueError):
         LlmAgent(
             name="test_agent",
@@ -55,7 +55,7 @@ async def test_enforce_transfer_to_parent_and_disallow_raises_error():
 
 
 @pytest.mark.asyncio
-async def test_enforce_transfer_to_parent_with_output_schema_raises_error():
+async def test_fallback_to_parent_with_output_schema_raises_error():
     """Tests that ValueError is raised when fallback_to_parent is True and output_schema is set."""
     from pydantic import BaseModel
 

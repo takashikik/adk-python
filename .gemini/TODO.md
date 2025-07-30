@@ -24,9 +24,9 @@ src/google/adk/agents/llm_agent.py
 Currently, the Agent has a disallow_transfer_to_parent setting to prevent transferring control to the parent agent. However, there are scenarios where the opposite behavior is desired: forcing the agent to always transfer control back to its parent. Without this feature, it's difficult to ensure that a child agent reliably returns to the parent's context after completing its task.
 
 Describe the solution you'd like
-I propose adding a new boolean property to the Agent, named enforce_transfer_to_parent.
+I propose adding a new boolean property to the Agent, named fallback_to_parent.
 
-When enforce_transfer_to_parent is set to True, the agent must transfer control to its parent agent after its execution is complete. This would act as the inverse of disallow_transfer_to_parent.
+When fallback_to_parent is set to True, the agent must transfer control to its parent agent after its execution is complete. This would act as the inverse of disallow_transfer_to_parent.
 
 Describe alternatives you've considered
 One could manually implement a transfer to the parent at the end of every tool within the agent. However, this approach is repetitive and error-prone. A dedicated property on the agent itself would provide a cleaner, more declarative, and more reliable way to manage the conversation flow.
@@ -56,14 +56,14 @@ def TransferToParentCallback(callback_context: CallbackContext):
                     ]
                 )
 
- I believe the ideal solution would be for an enforce_transfer_to_parent feature to be implemented.
+ I believe the ideal solution would be for an fallback_to_parent feature to be implemented.
 ```
 注意:  callback周りの修正ではなく,@src/google/adk/flows/llm_flows/agent_transfer.py を修正する形での実装にする必要がある
 ```参考
-このenforce_transfer_to_parent機能を実装するには、以下のコード箇所を修正する必要があります：
+このfallback_to_parent機能を実装するには、以下のコード箇所を修正する必要があります：
 
 1. LlmAgentクラスへのプロパティ追加
-LlmAgentクラスに新しいenforce_transfer_to_parentプロパティを追加する必要があります。既存のdisallow_transfer_to_parentとdisallow_transfer_to_peersプロパティの近くに配置するのが適切です。 llm_agent.py:156-166
+LlmAgentクラスに新しいfallback_to_parentプロパティを追加する必要があります。既存のdisallow_transfer_to_parentとdisallow_transfer_to_peersプロパティの近くに配置するのが適切です。 llm_agent.py:156-166
 
 2. LlmAgentConfigクラスへの設定項目追加
 YAML設定ファイルからの設定をサポートするため、LlmAgentConfigクラスにも対応するフィールドを追加する必要があります。 llm_agent_config.py:48-52
@@ -75,24 +75,24 @@ from_configメソッドで新しい設定項目を読み込む処理を追加す
 最も重要な修正箇所は、エージェントの実行完了時に親エージェントへの自動転送を行う処理です。これはBaseLlmFlowクラスの実行完了ロジックに実装する必要があります。 base_llm_flow.py:492-507
 
 5. 転送対象の決定ロジックの修正
-現在の転送対象を決定する_get_transfer_targets関数では、disallow_transfer_to_parentをチェックしていますが、enforce_transfer_to_parentの場合は異なるロジックが必要になる可能性があります。 agent_transfer.py:113-132
+現在の転送対象を決定する_get_transfer_targets関数では、disallow_transfer_to_parentをチェックしていますが、fallback_to_parentの場合は異なるロジックが必要になる可能性があります。 agent_transfer.py:113-132
 
 6. バリデーション処理の追加
-enforce_transfer_to_parentがdisallow_transfer_to_parentと競合しないよう、適切なバリデーション処理を追加する必要があります。既存の__check_output_schemaメソッドと同様の検証ロジックが必要です。 llm_agent.py:476-504
+fallback_to_parentがdisallow_transfer_to_parentと競合しないよう、適切なバリデーション処理を追加する必要があります。既存の__check_output_schemaメソッドと同様の検証ロジックが必要です。 llm_agent.py:476-504
 
 実装のポイント
-enforce_transfer_to_parent=Trueの場合、エージェントの実行完了時に自動的に親エージェントに制御を移すロジックが必要
-disallow_transfer_to_parent=Trueとenforce_transfer_to_parent=Trueの同時設定は論理的に矛盾するため、バリデーションエラーとする
+fallback_to_parent=Trueの場合、エージェントの実行完了時に自動的に親エージェントに制御を移すロジックが必要
+disallow_transfer_to_parent=Trueとfallback_to_parent=Trueの同時設定は論理的に矛盾するため、バリデーションエラーとする
 output_schemaが設定されている場合との整合性も確認が必要
 Notes
-この機能は既存のdisallow_transfer_to_parentの逆の動作を提供しますが、実装上は単純な反転ではありません。disallow_transfer_to_parentは転送能力を制限する設定ですが、enforce_transfer_to_parentは実行完了後の自動転送を強制する設定であり、フローの異なる段階で動作します。特に、エージェントの実行が完了した時点で親エージェントへの転送を自動的に実行する仕組みを新たに実装する必要があります。
+この機能は既存のdisallow_transfer_to_parentの逆の動作を提供しますが、実装上は単純な反転ではありません。disallow_transfer_to_parentは転送能力を制限する設定ですが、fallback_to_parentは実行完了後の自動転送を強制する設定であり、フローの異なる段階で動作します。特に、エージェントの実行が完了した時点で親エージェントへの転送を自動的に実行する仕組みを新たに実装する必要があります。
 ```
     ### サブタスク
     - [x] 修正する箇所を決めるための徹底的なソースコードの読み込み
     - [x] 修正方針を明文化しTIPS.mdへ記載
     - [x] 修正方針に従っての実装
 
-- [ ] enforce_transfer_to_parent→fallback_to_parentに変更
+- [ ] fallback_to_parent→fallback_to_parentに変更
 
 - [ ] src/google/adk/agents/llm_agent.pyの今回の修正に対する主要な問題点の修正
 1. 重複したインポート文
@@ -100,7 +100,7 @@ from ...agents.llm_agent import LlmAgent
 このインポート文が2回出現しています 。最初の条件分岐の前と、elseブロック内で再度インポートされています。これは不要な重複です。
 
 2. 重複したロジック
-第1段階と第2段階で同じ条件チェック（isinstance(agent, LlmAgent)、agent.enforce_transfer_to_parent、agent.parent_agent）が繰り返されています 。これはDRY原則に反しており、保守性を低下させます。
+第1段階と第2段階で同じ条件チェック（isinstance(agent, LlmAgent)、agent.fallback_to_parent、agent.parent_agent）が繰り返されています 。これはDRY原則に反しており、保守性を低下させます。
 
 3. 複雑な制御フロー
 2段階に分かれた処理により、同じ目的（親エージェントへの転送）を達成するために異なるパスが存在し、理解が困難です 。
@@ -112,10 +112,10 @@ from ...agents.llm_agent import LlmAgent
 2. ヘルパー関数の抽出
 共通の条件チェックと転送ロジックを別関数に抽出：
 
-def _should_enforce_transfer_to_parent(self, agent) -> bool:  
+def _should_fallback_to_parent(self, agent) -> bool:  
     return (  
         isinstance(agent, LlmAgent)  
-        and agent.enforce_transfer_to_parent  
+        and agent.fallback_to_parent  
         and agent.parent_agent  
     )  
   
@@ -129,11 +129,11 @@ def _create_transfer_function_call(self, agent):
 
 - [ ] tests/unittests/flows/llm_flows/test_enforce_transfer.pyへのテストケースの追加。不足しているテストケース
 1. parent_agentが存在しない場合のテスト
-enforce_transfer_to_parent=Trueだがparent_agentが設定されていない場合の動作をテストする必要があります llm_agent.py:157-163 。
+fallback_to_parent=Trueだがparent_agentが設定されていない場合の動作をテストする必要があります llm_agent.py:157-163 。
 
 @pytest.mark.asyncio  
-async def test_enforce_transfer_to_parent_without_parent_agent():  
-    """Tests behavior when enforce_transfer_to_parent is True but no parent_agent exists."""  
+async def test_fallback_to_parent_without_parent_agent():  
+    """Tests behavior when fallback_to_parent is True but no parent_agent exists."""  
     child_agent = LlmAgent(  
         name="child",  
         model=MockModel.create(responses=["Response from child"]),  
