@@ -92,12 +92,6 @@ Notes
     - [x] 修正方針を明文化しTIPS.mdへ記載
     - [x] 修正方針に従っての実装
 
-- [x] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
-- [x] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
-- [x] この修正の影響が問題ないか, type checkを行って
-- [x] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
-- [x] この修正のPR Messageを.gemini/WORK配下に作って
-- [x] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
 - [ ] enforce_transfer_to_parent→fallback_to_parentに変更
 
 - [ ] src/google/adk/agents/llm_agent.pyの今回の修正に対する主要な問題点の修正
@@ -143,7 +137,7 @@ async def test_enforce_transfer_to_parent_without_parent_agent():
     child_agent = LlmAgent(  
         name="child",  
         model=MockModel.create(responses=["Response from child"]),  
-        enforce_transfer_to_parent=True,  
+        fallback_to_parent=True,  
     )  
     # parent_agentが設定されていない状態でのテスト
 2. モデルが既にファンクションコールを返している場合のテスト
@@ -162,3 +156,9 @@ isinstance(agent, LlmAgent) の条件をテストするため、非LlmAgentで�
 fallback_to_parent=True
 parent_agent存在する
 かつ、モデル応答にtransfer to agentを含め、関数呼び出しが含まれていない()
+- [ ] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
+- [ ] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
+- [ ] この修正の影響が問題ないか, type checkを行って
+- [ ] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
+- [ ] この修正のPR Messageを.gemini/WORK配下に作って
+- [ ] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新

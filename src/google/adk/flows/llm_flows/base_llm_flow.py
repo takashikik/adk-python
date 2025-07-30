@@ -407,7 +407,7 @@ class BaseLlmFlow(ABC):
     agent = invocation_context.agent
     if (
         isinstance(agent, LlmAgent)
-        and agent.enforce_transfer_to_parent
+        and agent.fallback_to_parent
         and agent.parent_agent
         and not model_response_event.get_function_calls()
     ):
@@ -435,7 +435,7 @@ class BaseLlmFlow(ABC):
       agent = invocation_context.agent
       if (
           isinstance(agent, LlmAgent)
-          and agent.enforce_transfer_to_parent
+          and agent.fallback_to_parent
           and agent.parent_agent
       ):
         transfer_event = Event(

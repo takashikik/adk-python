@@ -12,7 +12,7 @@ child_agent = LlmAgent(
     name="child",
     model="gemini-2.5-pro",
     instruction="You are a child agent.",
-    enforce_transfer_to_parent=True,
+    fallback_to_parent=True,
     tools=[transfer_to_agent],
 )
 

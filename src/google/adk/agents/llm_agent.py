@@ -618,7 +618,7 @@ class LlmAgent(BaseAgent):
     if config.disallow_transfer_to_parent:
       agent.disallow_transfer_to_parent = config.disallow_transfer_to_parent
     if config.enforce_transfer_to_parent:
-      agent.enforce_transfer_to_parent = config.enforce_transfer_to_parent
+      agent.fallback_to_parent = config.fallback_to_parent
     if config.disallow_transfer_to_peers:
       agent.disallow_transfer_to_peers = config.disallow_transfer_to_peers
     if config.include_contents != 'default':

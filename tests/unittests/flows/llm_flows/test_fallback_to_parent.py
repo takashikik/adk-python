@@ -21,7 +21,7 @@ async def test_enforce_transfer_to_parent_transfers_control():
     child_agent = LlmAgent(
         name="child",
         model=MockModel.create(responses=["Response from child"]),
-        enforce_transfer_to_parent=True,
+        fallback_to_parent=True,
         tools=[transfer_to_agent],
     )
     parent_agent.sub_agents = [child_agent]
@@ -49,14 +49,14 @@ async def test_enforce_transfer_to_parent_and_disallow_raises_error():
         LlmAgent(
             name="test_agent",
             model="gemini-2.5-pro",
-            enforce_transfer_to_parent=True,
+            fallback_to_parent=True,
             disallow_transfer_to_parent=True,
         )
 
 
 @pytest.mark.asyncio
 async def test_enforce_transfer_to_parent_with_output_schema_raises_error():
-    """Tests that ValueError is raised when enforce_transfer_to_parent is True and output_schema is set."""
+    """Tests that ValueError is raised when fallback_to_parent is True and output_schema is set."""
     from pydantic import BaseModel
 
     class MySchema(BaseModel):
@@ -66,6 +66,6 @@ async def test_enforce_transfer_to_parent_with_output_schema_raises_error():
         LlmAgent(
             name="test_agent",
             model="gemini-2.5-pro",
-            enforce_transfer_to_parent=True,
+            fallback_to_parent=True,
             output_schema=MySchema,
         )

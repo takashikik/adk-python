@@ -1,7 +1,7 @@
 
 # `enforce_transfer_to_parent` Feature
 
-This document describes the `enforce_transfer_to_parent` feature that was added to the `LlmAgent`.
+This document describes the `fallback_to_parent` feature that was added to the `LlmAgent`.
 
 ## Overview
 
@@ -19,6 +19,6 @@ To use this feature, set the `enforce_transfer_to_parent` property of an `LlmAge
 child_agent = LlmAgent(
     name="child",
     model="gemini-2.5-pro",
-    fallback_to_parent=True,
+    enforce_transfer_to_parent=True,
 )
 ```
