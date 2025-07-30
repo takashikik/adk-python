@@ -14,11 +14,10 @@
 
 from __future__ import annotations
 
-import pytest
-
-from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.base_agent import BaseAgent
+from google.adk.agents.llm_agent import LlmAgent
 from google.genai.types import Part
+import pytest
 
 from ... import testing_utils
 
@@ -41,7 +40,7 @@ def test_fallback_to_parent_basic():
       'parent_response',
   ]
   mock_model = testing_utils.MockModel.create(responses=response)
-  
+
   child_agent = LlmAgent(
       name='child_agent',
       model=mock_model,
@@ -57,7 +56,7 @@ def test_fallback_to_parent_basic():
   runner = testing_utils.InMemoryRunner(child_agent)
 
   result = testing_utils.simplify_events(runner.run('test1'))
-  
+
   # Should have child response followed by forced transfer to parent and parent response
   assert len(result) >= 2
   assert result[0] == ('child_agent', 'child_response')
@@ -72,7 +71,7 @@ def test_fallback_to_parent_with_transfer_call():
       'parent_response',
   ]
   mock_model = testing_utils.MockModel.create(responses=response)
-  
+
   child_agent = LlmAgent(
       name='child_agent',
       model=mock_model,
@@ -87,7 +86,7 @@ def test_fallback_to_parent_with_transfer_call():
   runner = testing_utils.InMemoryRunner(child_agent)
 
   result = testing_utils.simplify_events(runner.run('test1'))
-  
+
   # Should have explicit transfer (not fallback), so no duplicate transfers
   expected_events = [
       ('child_agent', transfer_call_part('parent_agent')),
@@ -101,16 +100,16 @@ def test_fallback_to_parent_with_transfer_call():
 async def test_fallback_to_parent_without_parent_agent():
   """Tests behavior when fallback_to_parent is True but no parent_agent exists."""
   mock_model = testing_utils.MockModel.create(responses=['response_from_child'])
-  
+
   child_agent = LlmAgent(
       name='child',
       model=mock_model,
       fallback_to_parent=True,
   )
   # parent_agent is not set (None by default)
-  
+
   runner = testing_utils.InMemoryRunner(child_agent)
-  
+
   # Should work normally without fallback since there's no parent
   result = testing_utils.simplify_events(runner.run('test1'))
   assert result == [('child', 'response_from_child')]
@@ -123,7 +122,7 @@ def test_fallback_to_parent_disabled():
       'should_not_be_called',
   ]
   mock_model = testing_utils.MockModel.create(responses=response)
-  
+
   child_agent = LlmAgent(
       name='child_agent',
       model=mock_model,
@@ -138,22 +137,24 @@ def test_fallback_to_parent_disabled():
   runner = testing_utils.InMemoryRunner(child_agent)
 
   result = testing_utils.simplify_events(runner.run('test1'))
-  
+
   # Should only have child response, no fallback
   assert result == [('child_agent', 'child_response')]
 
 
 def test_fallback_to_parent_with_non_llm_agent():
   """Tests that fallback doesn't happen with non-LlmAgent instances."""
-  
+
   class MockNonLlmAgent(BaseAgent):
+
     def __init__(self, name: str):
       super().__init__(name=name)
       # This is not an LlmAgent, so fallback should not apply
-    
+
     async def _run_async_impl(self, ctx):
       # Simple implementation that yields a single event
       from google.adk.events.event import Event
+
       event = Event(
           id=Event.new_id(),
           invocation_id=ctx.invocation_id,
@@ -161,9 +162,9 @@ def test_fallback_to_parent_with_non_llm_agent():
       )
       event.content = testing_utils.UserContent('non_llm_response')
       yield event
-  
+
   mock_model = testing_utils.MockModel.create(responses=['parent_response'])
-  
+
   non_llm_agent = MockNonLlmAgent(name='non_llm_agent')
   parent_agent = LlmAgent(
       name='parent_agent',
@@ -174,7 +175,7 @@ def test_fallback_to_parent_with_non_llm_agent():
   runner = testing_utils.InMemoryRunner(non_llm_agent)
 
   result = testing_utils.simplify_events(runner.run('test1'))
-  
+
   # Should only have non-LLM agent response, no fallback
   assert result == [('non_llm_agent', 'non_llm_response')]
 
@@ -183,11 +184,11 @@ def test_fallback_to_parent_hierarchy():
   """Tests fallback behavior in a multi-level hierarchy."""
   response = [
       'grandchild_response',
-      'child_response', 
+      'child_response',
       'parent_response',
   ]
   mock_model = testing_utils.MockModel.create(responses=response)
-  
+
   grandchild_agent = LlmAgent(
       name='grandchild_agent',
       model=mock_model,
@@ -208,7 +209,7 @@ def test_fallback_to_parent_hierarchy():
   runner = testing_utils.InMemoryRunner(grandchild_agent)
 
   result = testing_utils.simplify_events(runner.run('test1'))
-  
+
   # Should cascade fallbacks: grandchild -> child -> parent
   assert len(result) >= 3
   assert result[0] == ('grandchild_agent', 'grandchild_response')
