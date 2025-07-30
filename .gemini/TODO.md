@@ -16,7 +16,7 @@
 
 
 ## P1
-- [ ] 下記のfallback_to_parent追加のIssueへの対応(サブタスクに分けて対応)
+- [x] 下記のfallback_to_parent追加のIssueへの対応(サブタスクに分けて対応)
 少なくとも
 src/google/adk/agents/llm_agent_config.py
 src/google/adk/agents/llm_agent.py
@@ -36,7 +36,7 @@ One could manually implement a transfer to the parent at the end of every tool w
 Additional context
 This feature would be particularly useful for creating hierarchical agent structures. For example, a parent agent could delegate a specific, self-contained task to a child agent, and with this new property, it can be guaranteed that the conversation flow returns to the parent to continue the main process. This provides more robust control over agent routing.
 
-- [ ] tests/unittests/flows/llm_flows/test_enforce_transfer.pyへのテストケースの追加。
+- [x] tests/unittests/flows/llm_flows/test_enforce_transfer.pyへのテストケースの追加。
 特に必要なテストケース
 1. parent_agentが存在しない場合のテスト
 fallback_to_parent=Trueだがparent_agentが設定されていない場合の動作をテストする必要があります llm_agent.py:157-163 。
@@ -59,18 +59,19 @@ isinstance(agent, LlmAgent) の条件をテストするため、非LlmAgentで�
 4. ライブモードでのテスト
 現在のテストは _run_one_step_async のみをテストしていますが、ライブモード（_postprocess_live）での動作もテストすべきです base_llm_flow.py:454-467 。
 
-- [ ] 今回の修正のリファクタリング
+- [x] 今回の修正のリファクタリング
 
-- [ ] 以下の内容をコメントの必要な所や, pull request message(.gemini/WORK/pr_message.md)に追加
+- [x] 以下の内容をコメントの必要な所や, pull request message(.gemini/WORK/pr_message.md)に追加
 フォールバック動作は、モデル転送が発生しない場合にのみアクティブになります。親へのフォールバックは、次の場合にのみ発生します。
 エージェントはLlmAgentインスタンスである
 fallback_to_parent=True
 parent_agent存在する
 かつ、モデル応答にtransfer to agentを含め、関数呼び出しが含まれていない()
-- [ ] src/google/adk/agents/llm_agent.pyのfallback_to_parentの説明文をより詳細に記載
-- [ ] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
-- [ ] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
-- [ ] この修正の影響が問題ないか, type checkを行って
-- [ ] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
-- [ ] この修正のPR Messageを.gemini/WORK配下に作って
-- [ ] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
+- [x] src/google/adk/agents/llm_agent.pyのfallback_to_parentの説明文をより詳細に記載
+- [x] この修正の影響が他のテストケースに影響問題ないか, unittest(tests/unittests)を行い、影響あれば必要に応じてコードまたはテストコードの修正を行って
+- [x] この修正に関するunittest(tests/unittests)を追加し,動作が問題ないか検証して,その場合に既存のコードファイルを大幅に変更したりしてはいけない
+- [x] この修正の影響が問題ないか, type checkを行って
+- [x] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
+- [x] この修正のPR Messageを.gemini/WORK配下に作って
+- [x] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
+- [ ] 今回のこの修正に対しての徹底的なコードレビューを実施し、修正必要あれば修正を進めて
