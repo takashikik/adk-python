@@ -98,7 +98,7 @@ Notes
 - [x] すべてのtestがpassするか,再度 unittest(tests/unittests)を行って
 - [x] この修正のPR Messageを.gemini/WORK配下に作って
 - [x] GEMINI.mdに従って.gemini/*配下のドキュメントをすべて更新
-- [ ] Integration テスト用の超簡単なsample agent.pyを作って
+- [ ] enforce_transfer_to_parent→fallback_to_parentに変更
 
 - [ ] src/google/adk/agents/llm_agent.pyの今回の修正に対する主要な問題点の修正
 1. 重複したインポート文
@@ -155,3 +155,10 @@ isinstance(agent, LlmAgent) の条件をテストするため、非LlmAgentで�
 4. ライブモードでのテスト
 現在のテストは _run_one_step_async のみをテストしていますが、ライブモード（_postprocess_live）での動作もテストすべきです base_llm_flow.py:454-467 。
 
+
+- [ ] 以下の内容をコメントの必要な所や, pull request message(.gemini/WORK/pr_message.md)に追加
+フォールバック動作は、モデル転送が発生しない場合にのみアクティブになります。親へのフォールバックは、次の場合にのみ発生します。
+エージェントはLlmAgentインスタンスである
+fallback_to_parent=True
+parent_agent存在する
+かつ、モデル応答にtransfer to agentを含め、関数呼び出しが含まれていない()
