@@ -406,18 +406,14 @@ class BaseLlmFlow(ABC):
 
     agent = invocation_context.agent
     if (
-        isinstance(agent, LlmAgent)
-        and agent.fallback_to_parent
-        and agent.parent_agent
+        self._should_fallback_to_parent(agent)
         and not model_response_event.get_function_calls()
     ):
+        agent = cast(LlmAgent, agent)
         model_response_event.content = types.Content(
             parts=[
                 types.Part(
-                    function_call=types.FunctionCall(
-                        name='transfer_to_agent',
-                        args={'agent_name': agent.parent_agent.name},
-                    )
+                    function_call=self._create_transfer_function_call(agent)
                 )
             ]
         )
@@ -429,34 +425,6 @@ class BaseLlmFlow(ABC):
           invocation_context, model_response_event, llm_request
       ):
         yield event
-    else:
-      from ...agents.llm_agent import LlmAgent
-
-      agent = invocation_context.agent
-      if (
-          isinstance(agent, LlmAgent)
-          and agent.fallback_to_parent
-          and agent.parent_agent
-      ):
-        transfer_event = Event(
-            id=Event.new_id(),
-            invocation_id=invocation_context.invocation_id,
-            author=agent.name,
-            content=types.Content(
-                parts=[
-                    types.Part(
-                        function_call=types.FunctionCall(
-                            name='transfer_to_agent',
-                            args={'agent_name': agent.parent_agent.name},
-                        )
-                    )
-                ]
-            ),
-        )
-        async for event in self._postprocess_handle_function_calls_async(
-            invocation_context, transfer_event, llm_request
-        ):
-          yield event
 
   async def _postprocess_live(
       self,
@@ -554,6 +522,20 @@ class BaseLlmFlow(ABC):
     if not agent_to_run:
       raise ValueError(f'Agent {agent_name} not found in the agent tree.')
     return agent_to_run
+
+  def _should_fallback_to_parent(self, agent: BaseAgent) -> bool:
+    from ...agents.llm_agent import LlmAgent
+    return (
+        isinstance(agent, LlmAgent)
+        and agent.fallback_to_parent
+        and agent.parent_agent
+    )
+
+  def _create_transfer_function_call(self, agent: LlmAgent) -> types.FunctionCall:
+    return types.FunctionCall(
+        name='transfer_to_agent',
+        args={'agent_name': agent.parent_agent.name},
+    )
 
   async def _call_llm_async(
       self,
