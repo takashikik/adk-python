@@ -25,6 +25,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 from google.genai import types
+from google.genai.types import Part
 from websockets.exceptions import ConnectionClosedOK
 
 from . import functions
@@ -766,7 +767,6 @@ class BaseLlmFlow(ABC):
         and agent.parent_agent is not None
     ):
       # Create a function call event for transfer to parent
-      from google.genai.types import Part
       transfer_call = Part.from_function_call(
           name='transfer_to_agent', 
           args={'agent_name': agent.parent_agent.name}
