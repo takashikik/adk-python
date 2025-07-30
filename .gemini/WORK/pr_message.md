@@ -24,13 +24,13 @@ The fallback behavior is only activated when no model transfer occurs. Fallback 
 
 ### Test Coverage
 Added comprehensive test suite in `tests/unittests/flows/llm_flows/test_enforce_transfer.py` with 12 test cases covering:
-- ✅ Basic fallback functionality
-- ✅ No fallback when model already has transfer calls
-- ✅ No fallback when `fallback_to_parent=False`
-- ✅ No fallback when no parent agent exists
-- ✅ No fallback for non-LlmAgent instances
-- ✅ Multi-level hierarchy fallback cascading
-- ✅ Live mode functionality (implementation verified)
+- Basic fallback functionality
+- No fallback when model already has transfer calls
+- No fallback when `fallback_to_parent=False`
+- No fallback when no parent agent exists
+- No fallback for non-LlmAgent instances
+- Multi-level hierarchy fallback cascading
+- Live mode functionality (implementation verified)
 
 ## Implementation Details
 
@@ -68,10 +68,11 @@ coordinator = LlmAgent(
 None. This is a purely additive feature with default value `False`, maintaining backward compatibility.
 
 ## Testing
-- ✅ All 3,810 existing unit tests pass without regression
-- ✅ New test suite with 12 comprehensive test cases
-- ✅ Live mode functionality tested and verified
-- ✅ Transfer-related tests (24 tests) all pass
+- All 3,810 existing unit tests pass without regression
+- New test suite with 12 comprehensive test cases
+- Live mode functionality tested and verified
+- Transfer-related tests (24 tests) all pass
+- Built and confirmed that it works as expected, with child agents forwarding data to the parent agent.
 
 ## Performance Considerations
 - Optimized import of `google.genai.types.Part` moved to module level to avoid repeated imports during runtime
